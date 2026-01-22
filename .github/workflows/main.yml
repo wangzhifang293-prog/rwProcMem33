@@ -1,0 +1,30 @@
+name: Build Kernel Module
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 安装编译工具
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential make gcc-aarch64-linux-gnu
+
+      - name: 检查目录结构
+        run: |
+          ls -la
+          ls -la hwBreakpointProc_module || echo "目录不存在！"
+
+      - name: 编译模块
+        run: |
+          cd hwBreakpointProc_module
+          make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- || echo "编译失败，请检查 Makefile"
+
+      - name: 上传结果
+        uses: actions/upload-artifact@v4
+        with:
+          name: module-output
+          path: hwBreakpointProc_module/*.ko
